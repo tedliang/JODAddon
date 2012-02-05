@@ -17,6 +17,11 @@ import com.sun.star.lang.XMultiServiceFactory;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.uno.XComponentContext;
 
+/**
+ *
+ * @author tedliang
+ */
+
 public class ScriptDialog {
 
     private static final String _textFieldName = "TextInput";

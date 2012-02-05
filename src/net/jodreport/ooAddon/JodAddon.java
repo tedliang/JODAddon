@@ -43,6 +43,11 @@ import net.sf.jooreports.templates.DocumentTemplateFactory;
 import org.apache.commons.io.FilenameUtils;
 import org.xml.sax.SAXException;
 
+/**
+ *
+ * @author tedliang
+ */
+
 public final class JodAddon extends WeakBase
         implements com.sun.star.lang.XInitialization,
         com.sun.star.frame.XDispatch,
@@ -52,8 +57,7 @@ public final class JodAddon extends WeakBase
     private final XComponentContext m_xContext;
     private com.sun.star.frame.XFrame m_xFrame;
     private static final String m_implementationName = JodAddon.class.getName();
-    private static final String[] m_serviceNames = {
-        "com.sun.star.frame.ProtocolHandler"};
+    private static final String[] m_serviceNames = {"com.sun.star.frame.ProtocolHandler"};
     private Setting setting = new Setting("");
 
     public JodAddon(XComponentContext context) {

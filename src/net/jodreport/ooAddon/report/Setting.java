@@ -1,12 +1,10 @@
 package net.jodreport.ooAddon.report;
 
-
-
 import java.io.File;
 
 /**
  *
- * @author teddy
+ * @author tedliang
  */
 public class Setting {
 

@@ -1,13 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package net.jodreport.ooAddon.insertScript;
 
 /**
  *
- * @author teddy
+ * @author tedliang
  */
 public class Script {
 

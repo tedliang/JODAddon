@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package net.jodreport.ooAddon.insertScript;
 
 import com.sun.star.awt.ActionEvent;
@@ -11,7 +6,7 @@ import com.sun.star.lang.EventObject;
 
 /**
  *
- * @author teddy
+ * @author tedliang
  */
 public class ScriptActionListener implements XActionListener {
 
