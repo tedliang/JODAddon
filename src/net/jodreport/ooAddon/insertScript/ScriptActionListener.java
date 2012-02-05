@@ -5,7 +5,6 @@
 
 package net.jodreport.ooAddon.insertScript;
 
-import net.jodreport.ooAddon.report.*;
 import com.sun.star.awt.ActionEvent;
 import com.sun.star.awt.XActionListener;
 import com.sun.star.lang.EventObject;

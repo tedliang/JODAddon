@@ -103,7 +103,7 @@ public final class JodAddon extends WeakBase
         try {
             if (path != null && !path.equals("")) {
 
-                // OK, it's funny but sometimes we may have in path spaces, and sometimes
+                // sometimes we may have in path spaces, and sometimes
                 // we may have nice %20 in place of spaces....
                 if (path.indexOf(" ") != -1) {
                     path = path.replaceAll(" ", "%20");
