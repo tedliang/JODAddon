@@ -1,1 +1,1 @@
-JODReport Open/Libre Office Addon.
+The JODReports Addon for OpenOffice.org/LibreOffice to insert JOOScript and generate report with xml/properties data file.
