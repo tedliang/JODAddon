@@ -1,4 +1,4 @@
-package net.jodreport.ooAddon.report;
+package net.jodreport.ooAddon;
 
 import java.io.IOException;
 import java.io.Writer;

@@ -1,4 +1,4 @@
-package net.jodreport.ooAddon.insertScript;
+package net.jodreport.ooAddon.ui.script;
 
 /**
  *

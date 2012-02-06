@@ -1,4 +1,4 @@
-package net.jodreport.ooAddon.report;
+package net.jodreport.ooAddon.ui.report;
 
 import java.io.File;
 

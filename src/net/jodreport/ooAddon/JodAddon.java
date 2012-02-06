@@ -5,8 +5,7 @@ import com.sun.star.awt.Rectangle;
 import com.sun.star.awt.XMessageBox;
 import com.sun.star.awt.XMessageBoxFactory;
 import com.sun.star.awt.XWindowPeer;
-import net.jodreport.ooAddon.report.FreemarkerTemplateExceptionHandler;
-import net.jodreport.ooAddon.report.Setting;
+import net.jodreport.ooAddon.ui.report.Setting;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.frame.XComponentLoader;
@@ -22,7 +21,6 @@ import com.sun.star.lang.XSingleComponentFactory;
 import com.sun.star.registry.XRegistryKey;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.text.XDependentTextField;
-import com.sun.star.text.XText;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextViewCursorSupplier;
 import freemarker.core.ParseException;
@@ -34,10 +32,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 import javax.xml.parsers.ParserConfigurationException;
-import net.jodreport.ooAddon.insertScript.Script;
-import net.jodreport.ooAddon.insertScript.ScriptDialog;
-import net.jodreport.ooAddon.report.SettingDialog;
+import net.jodreport.ooAddon.ui.script.Script;
+import net.jodreport.ooAddon.ui.script.ScriptDialog;
+import net.jodreport.ooAddon.ui.report.SettingDialog;
 import net.sf.jooreports.templates.DocumentTemplate;
+import net.sf.jooreports.templates.DocumentTemplate.ContentWrapper;
 import net.sf.jooreports.templates.DocumentTemplateException;
 import net.sf.jooreports.templates.DocumentTemplateFactory;
 import org.apache.commons.io.FilenameUtils;
@@ -117,15 +116,15 @@ public final class JodAddon extends WeakBase
                     SettingDialog sd = new SettingDialog(m_xContext, setting);
                     if (sd.createDialog()) {
                         if (setting.isDataFileExist()) {
-                            XStorable storable = (XStorable) UnoRuntime.queryInterface(
-                                    XStorable.class, m_xFrame.getController().getModel());
+                            XStorable storable = UnoRuntime.queryInterface(
+                                    XStorable.class, getXModel());
                             storable.store();
 
                             String outputFilePath = file.getAbsolutePath();
                             int idx = outputFilePath.lastIndexOf(".");
                             outputFilePath = outputFilePath.substring(0, idx) + "-report" + outputFilePath.substring(idx);
                             createReport(file, new File(setting.getDataFilePath()), new File(outputFilePath));
-                            openReport(m_xContext, outputFilePath);
+                            openReport( outputFilePath);
                         } else {
                             displayMessage("errorbox", "ERROR", "No data file found!");
                         }
@@ -138,7 +137,7 @@ public final class JodAddon extends WeakBase
                 displayMessage("warningbox", "WARNING", "You must first save your file on hard disk!");
             }
         } catch (ParseException ex) {
-            displayMessage("errorbox", "ERROR", "Script syntax error. Possible reason: Mismatched list or if-else!\nDetails: "+ex.toString());
+            displayMessage("errorbox", "ERROR", "Script syntax error. Possible reason: Unclosed directive (list or if-else)!\nDetails: "+ex.toString());
         } catch (Exception ex) {
             displayMessage("errorbox", "ERROR", ex.toString());
         }
@@ -149,18 +148,6 @@ public final class JodAddon extends WeakBase
             ScriptDialog sd = new ScriptDialog(m_xContext);
             Script script = sd.createDialog();
             if (script != null && script.getValue() != null && !script.getValue().equals("")) {
-
-                XModel xDoc = (XModel) UnoRuntime.queryInterface(
-                        XModel.class, m_xFrame.getController().getModel());
-
-                // query its XTextDocument interface to get the text
-                XTextDocument mxDoc = (XTextDocument) UnoRuntime.queryInterface(
-                        XTextDocument.class, xDoc);
-
-                // get a reference to the body text of the document
-                XText textDoc = mxDoc.getText();
-
-                XMultiServiceFactory loXMSFactory = (XMultiServiceFactory) UnoRuntime.queryInterface(XMultiServiceFactory.class, mxDoc);
 
                 String type;
                 String propertyName;
@@ -173,21 +160,25 @@ public final class JodAddon extends WeakBase
                     propertyName = "ScriptType";
                 }
 
-                XDependentTextField loXDependentTextField = (XDependentTextField) UnoRuntime.queryInterface(XDependentTextField.class,
+               // query its XTextDocument interface to get the text
+                XTextDocument mxDoc = UnoRuntime.queryInterface(
+                        XTextDocument.class, getXModel());
+
+                XMultiServiceFactory loXMSFactory = UnoRuntime.queryInterface(XMultiServiceFactory.class, mxDoc);
+                XDependentTextField loXDependentTextField = UnoRuntime.queryInterface(XDependentTextField.class,
                         loXMSFactory.createInstance("com.sun.star.text.textfield." + type));
 
-                XPropertySet loXPropertySet = (XPropertySet) UnoRuntime.queryInterface(XPropertySet.class, loXDependentTextField);
+                XPropertySet loXPropertySet = UnoRuntime.queryInterface(XPropertySet.class, loXDependentTextField);
 
                 // And now set properties
                 loXPropertySet.setPropertyValue(propertyName, "jooscript");
                 loXPropertySet.setPropertyValue("Content", script.getValue());
 
                 // the controller gives us the TextViewCursor
-                XTextViewCursorSupplier xViewCursorSupplier =
-                        (XTextViewCursorSupplier) UnoRuntime.queryInterface(
-                        XTextViewCursorSupplier.class, xDoc.getCurrentController());
+                XTextViewCursorSupplier xViewCursorSupplier = UnoRuntime.queryInterface(
+                        XTextViewCursorSupplier.class, m_xFrame.getController());
 
-                textDoc.insertTextContent(xViewCursorSupplier.getViewCursor(), loXDependentTextField, true);
+                mxDoc.getText().insertTextContent(xViewCursorSupplier.getViewCursor(), loXDependentTextField, true);
 
             }
 
@@ -204,6 +195,11 @@ public final class JodAddon extends WeakBase
         documentTemplateFactory.getFreemarkerConfiguration().setTemplateExceptionHandler(
                 new FreemarkerTemplateExceptionHandler());
         DocumentTemplate template = documentTemplateFactory.getTemplate(templateFile);
+        template.setContentWrapper(new ContentWrapper(){
+            public String wrapContent(String string) {
+                return string;
+            }
+        });
 
         Object model = null;
         String dataFileExtension = FilenameUtils.getExtension(dataFile.getName());
@@ -221,17 +217,15 @@ public final class JodAddon extends WeakBase
 
     }
 
-    private void openReport(XComponentContext xContext, String file) throws com.sun.star.uno.Exception {
+    private void openReport(String file) throws com.sun.star.uno.Exception {
         // get the remote office service manager
-        XMultiComponentFactory xMCF = xContext.getServiceManager();
+        XMultiComponentFactory xMCF = m_xContext.getServiceManager();
 
         // get a new instance of the desktop
-        XDesktop xDesktop = (com.sun.star.frame.XDesktop) UnoRuntime.queryInterface(com.sun.star.frame.XDesktop.class,
-                xMCF.createInstanceWithContext("com.sun.star.frame.Desktop",
-                xContext));
+        XDesktop xDesktop = UnoRuntime.queryInterface(com.sun.star.frame.XDesktop.class,
+                xMCF.createInstanceWithContext("com.sun.star.frame.Desktop", m_xContext));
 
-        XComponentLoader xCompLoader =
-                (com.sun.star.frame.XComponentLoader) UnoRuntime.queryInterface(
+        XComponentLoader xCompLoader = UnoRuntime.queryInterface(
                 com.sun.star.frame.XComponentLoader.class, xDesktop);
 
         xCompLoader.loadComponentFromURL("file:///" + file, "_blank", 0, new PropertyValue[0]);
@@ -239,16 +233,21 @@ public final class JodAddon extends WeakBase
 
     private String getCurrentDocumentPath() {
         XModel xDoc = (XModel) UnoRuntime.queryInterface(
-                XModel.class, m_xFrame.getController().getModel());
+                XModel.class, getXModel());
         return xDoc.getURL();
+    }
+
+    private XModel getXModel(){
+        return m_xFrame.getController().getModel();
     }
 
     private void displayMessage(String type, String title, String msg){
         XMessageBoxFactory factory;
         try {
-            factory = (XMessageBoxFactory) UnoRuntime.queryInterface(XMessageBoxFactory.class, m_xContext.getServiceManager().createInstanceWithContext("com.sun.star.awt.Toolkit", m_xContext));
+            factory = UnoRuntime.queryInterface(XMessageBoxFactory.class,
+                    m_xContext.getServiceManager().createInstanceWithContext("com.sun.star.awt.Toolkit", m_xContext));
 
-            XWindowPeer parent = (XWindowPeer)UnoRuntime.queryInterface(
+            XWindowPeer parent = UnoRuntime.queryInterface(
                     XWindowPeer.class, m_xFrame.getContainerWindow());
             XMessageBox box = factory.createMessageBox(parent,new Rectangle(),type,MessageBoxButtons.BUTTONS_OK,title,msg);
 
