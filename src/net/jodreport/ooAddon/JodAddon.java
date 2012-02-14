@@ -22,6 +22,7 @@ import com.sun.star.registry.XRegistryKey;
 import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextDocument;
+import com.sun.star.text.XTextViewCursor;
 import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.util.XModifiable;
 import freemarker.core.ParseException;
@@ -181,10 +182,10 @@ public final class JodAddon extends WeakBase
                 loXPropertySet.setPropertyValue("Content", script.getValue());
 
                 // the controller gives us the TextViewCursor
-                XTextViewCursorSupplier xViewCursorSupplier = UnoRuntime.queryInterface(
-                        XTextViewCursorSupplier.class, m_xFrame.getController());
+                XTextViewCursor cursor = UnoRuntime.queryInterface(
+                        XTextViewCursorSupplier.class, m_xFrame.getController()).getViewCursor();
 
-                mxDoc.getText().insertTextContent(xViewCursorSupplier.getViewCursor(), loXDependentTextField, true);
+                cursor.getText().insertTextContent(cursor, loXDependentTextField, true);
 
             }
 
