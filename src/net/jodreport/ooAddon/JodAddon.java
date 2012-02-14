@@ -202,11 +202,6 @@ public final class JodAddon extends WeakBase
         documentTemplateFactory.getFreemarkerConfiguration().setTemplateExceptionHandler(
                 new FreemarkerTemplateExceptionHandler());
         DocumentTemplate template = documentTemplateFactory.getTemplate(templateFile);
-        template.setContentWrapper(new ContentWrapper(){
-            public String wrapContent(String string) {
-                return string;
-            }
-        });
 
         Object model = null;
         String dataFileExtension = FilenameUtils.getExtension(dataFile.getName());
