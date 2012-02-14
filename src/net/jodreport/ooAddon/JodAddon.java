@@ -23,8 +23,10 @@ import com.sun.star.lib.uno.helper.WeakBase;
 import com.sun.star.text.XDependentTextField;
 import com.sun.star.text.XTextDocument;
 import com.sun.star.text.XTextViewCursorSupplier;
+import com.sun.star.util.XModifiable;
 import freemarker.core.ParseException;
 import freemarker.ext.dom.NodeModel;
+import java.awt.HeadlessException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -116,9 +118,13 @@ public final class JodAddon extends WeakBase
                     SettingDialog sd = new SettingDialog(m_xContext, setting);
                     if (sd.createDialog()) {
                         if (setting.isDataFileExist()) {
-                            XStorable storable = UnoRuntime.queryInterface(
-                                    XStorable.class, getXModel());
-                            storable.store();
+
+                            if(isModified()){
+                                if(confirmQuestion("Unsaved Document",
+                                        "Your file was modified from the last save.\nOnly last saved version of file will be used.\nWould you like to save this version and generate report?")){
+                                    UnoRuntime.queryInterface(XStorable.class, getXModel()).store();
+                                }
+                            }
 
                             String outputFilePath = file.getAbsolutePath();
                             int idx = outputFilePath.lastIndexOf(".");
@@ -232,9 +238,12 @@ public final class JodAddon extends WeakBase
     }
 
     private String getCurrentDocumentPath() {
-        XModel xDoc = (XModel) UnoRuntime.queryInterface(
-                XModel.class, getXModel());
-        return xDoc.getURL();
+        return UnoRuntime.queryInterface(
+                XModel.class, getXModel()).getURL();
+    }
+
+    private boolean isModified() throws HeadlessException {
+        return UnoRuntime.queryInterface(XModifiable.class, getXModel()).isModified();
     }
 
     private XModel getXModel(){
@@ -255,6 +264,37 @@ public final class JodAddon extends WeakBase
         } catch (com.sun.star.uno.Exception ex) {
             ex.printStackTrace();
         }
+
+    }
+
+        /**
+     * Creates a querybox with the title and text given
+     *
+     * @param title The title of the dialog.
+     * @param msg The text of the dialog.
+     *
+     * @return boolean Returns the answer code of the querybox (1 - OK/true, 0 - Cancel/false)
+     *
+     */
+    private boolean confirmQuestion(String title, String msg){
+        try {
+            XMessageBoxFactory factory = UnoRuntime.queryInterface(XMessageBoxFactory.class,
+                    m_xContext.getServiceManager().createInstanceWithContext(
+                    "com.sun.star.awt.Toolkit", m_xContext));
+
+            XWindowPeer parent = UnoRuntime.queryInterface(
+                    XWindowPeer.class, m_xFrame.getContainerWindow());
+            
+            XMessageBox box = factory.createMessageBox(parent,new Rectangle(),
+                    "querybox", MessageBoxButtons.BUTTONS_OK_CANCEL,title,msg);
+
+            return box.execute()==1;
+
+        } catch (com.sun.star.uno.Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return false;
 
     }
 
