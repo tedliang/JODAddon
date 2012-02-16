@@ -7,6 +7,7 @@ import com.sun.star.awt.XControl;
 import com.sun.star.awt.XControlModel;
 import com.sun.star.awt.XControlContainer;
 import com.sun.star.awt.XDialog;
+import com.sun.star.awt.XListBox;
 import com.sun.star.awt.XTextComponent;
 import com.sun.star.awt.XToolkit;
 import com.sun.star.awt.XWindow;
@@ -31,6 +32,7 @@ public class ScriptDialog implements StandardDialog {
     private static final String _checkboxName = "CheckBox";
     private static final String _cancelButtonName = "CancelButton";
     private static final String _labelName = "Label1";
+    private static final String _shortcutName = "Shortcut1";
     
     private final XComponentContext _xComponentContext;
 
@@ -76,6 +78,18 @@ public class ScriptDialog implements StandardDialog {
         xPSetLabel.setPropertyValue( "Height", new Integer( 14 ) );
         xPSetLabel.setPropertyValue( "Name", _labelName );
         xPSetLabel.setPropertyValue( "Label", "Please input JOOScript:" );
+
+        Object shortcutModel = xMultiServiceFactory.createInstance("com.sun.star.awt.UnoControlListBoxModel" );
+        XPropertySet xPSetList = (XPropertySet)UnoRuntime.queryInterface(XPropertySet.class, shortcutModel);
+        xPSetList.setPropertyValue("PositionX", new Integer(160));
+        xPSetList.setPropertyValue("PositionY", new Integer(10));
+        xPSetList.setPropertyValue("Width", new Integer(70));
+        xPSetList.setPropertyValue("Height", new Integer(12));
+        xPSetList.setPropertyValue("Name", _shortcutName);
+        xPSetList.setPropertyValue("Dropdown", Boolean.TRUE);
+        xPSetList.setPropertyValue("MultiSelection", Boolean.FALSE);
+        xPSetList.setPropertyValue("HelpText", "Script hint");
+
 
         Object oTFModel = xMultiServiceFactory.createInstance("com.sun.star.awt.UnoControlEditModel");
         // Set the properties at the model - keep in mind to pass the property names in alphabetical order!
@@ -135,6 +149,7 @@ public class ScriptDialog implements StandardDialog {
         XNameContainer xNameCont = UnoRuntime.queryInterface(
             XNameContainer.class, dialogModel );
         xNameCont.insertByName( _labelName, labelModel );
+        xNameCont.insertByName( _shortcutName, shortcutModel );
         xNameCont.insertByName( _textFieldName, oTFModel );
         xNameCont.insertByName( _checkboxName, checkboxModel );
         xNameCont.insertByName( _buttonName, buttonModel );
@@ -152,6 +167,24 @@ public class ScriptDialog implements StandardDialog {
         // add an action listener to the button control
         XButton xButton = UnoRuntime.queryInterface(XButton.class, getControl(_buttonName));
         xButton.addActionListener(new StandardActionListener( this ));
+
+        XListBox shortcutList = (XListBox)UnoRuntime.queryInterface(XListBox.class, getControl(_shortcutName));
+        shortcutList.addItemListener(new ShortcutSelectListener(this));
+        shortcutList.setDropDownLineCount((short)15);
+
+        shortcutList.addItem("Please select ...", (short)0 );
+        shortcutList.addItem("Variable", (short)1 );
+        shortcutList.addItem("List - begin", (short)2 );
+        shortcutList.addItem("Break", (short)3 );
+        shortcutList.addItem("List - end", (short)4 );
+        shortcutList.addItem("If - begin", (short)5 );
+        shortcutList.addItem("Else if", (short)6 );
+        shortcutList.addItem("Else", (short)7 );
+        shortcutList.addItem("If - end", (short)8 );
+        shortcutList.addItem("Assign", (short)9 );
+        shortcutList.addItem("Before table row", (short)10 );
+        shortcutList.addItem("After table row", (short)11 );
+
 
         // create a peer
         Object toolkit = xMultiComponentFactory.createInstanceWithContext(
@@ -174,6 +207,52 @@ public class ScriptDialog implements StandardDialog {
         xComponent.dispose();
 
         return script;
+    }
+
+    public void insertScript(int selected){
+        if (selected == 0) {
+            return;
+        }
+        String jooscript = "";
+        switch (selected) {
+            case 1:
+                jooscript = "${}";
+                break;
+            case 2:
+                jooscript = "[#list  as ]";
+                break;
+            case 3:
+                jooscript = "[#break]";
+                break;
+            case 4:
+                jooscript = "[/#list]";
+                break;
+            case 5:
+                jooscript = "[#if ]";
+                break;
+            case 6:
+                jooscript = "[#elseif ]";
+                break;
+            case 7:
+                jooscript = "[#else]";
+                break;
+            case 8:
+                jooscript = "[/#if]";
+                break;
+            case 9:
+                jooscript = "[#assign ]";
+                break;
+            case 10:
+                jooscript = "@table:table-row\n";
+                break;
+            case 11:
+                jooscript = "@/table:table-row\n";
+                break;
+            default:
+                return;
+        }
+        XTextComponent xTextComponent = UnoRuntime.queryInterface(XTextComponent.class, getControl(_textFieldName));
+        xTextComponent.setText(xTextComponent.getText() + jooscript);
     }
 
     public void performOkAction(){
