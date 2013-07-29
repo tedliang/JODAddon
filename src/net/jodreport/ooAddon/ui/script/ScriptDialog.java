@@ -115,7 +115,7 @@ public class ScriptDialog implements StandardDialog {
         xPSetCheck.setPropertyValue( "Height", new Integer( 14 ) );
         xPSetCheck.setPropertyValue( "Name", _checkboxName );
         xPSetCheck.setPropertyValue( "TabIndex", new Short( (short)20 ) );
-        xPSetCheck.setPropertyValue( "Label", "Visiable" );
+        xPSetCheck.setPropertyValue( "Label", "Visible" );
         xPSetCheck.setPropertyValue( "State", new Short((short) 1));
 
         // create the button model and set the properties
@@ -184,6 +184,8 @@ public class ScriptDialog implements StandardDialog {
         shortcutList.addItem("Assign", (short)9 );
         shortcutList.addItem("Before table row", (short)10 );
         shortcutList.addItem("After table row", (short)11 );
+        shortcutList.addItem("Before paragraph", (short)12 );
+        shortcutList.addItem("After paragraph", (short)13 );
 
 
         // create a peer
@@ -247,6 +249,12 @@ public class ScriptDialog implements StandardDialog {
                 break;
             case 11:
                 jooscript = "@/table:table-row\n";
+                break;
+            case 12:
+                jooscript = "@text:p\n";
+                break;
+            case 13:
+                jooscript = "@/text:p\n";
                 break;
             default:
                 return;
