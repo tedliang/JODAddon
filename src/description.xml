@@ -7,7 +7,7 @@
         <name xlink:href="http://jodreports.sourceforge.net" lang="en">JODReports</name>
     </publisher>
     <display-name>
-        <name lang="en">JODReprots Addon</name>
+        <name lang="en">JODReports Addon</name>
     </display-name>
     <extension-description>
         <src lang="en-US" xlink:href="description/description.txt"/>
