@@ -19,7 +19,7 @@
       <node oor:name="MenuItems">
             <node oor:name="M0" oor:op="replace">
         <prop oor:name="Title" oor:type="xs:string">
-          <value xml:lang="en">JODReport</value>
+          <value xml:lang="en">JODReports</value>
           <value/>
         </prop>
         <node oor:name="Submenu">
@@ -67,6 +67,39 @@
     </node>
     <node oor:name="OfficeToolBar">
       <node oor:name="net.jodreport.ooAddon.jodaddon" oor:op="replace">
+        <prop oor:name="Title" oor:type="xs:string" oor:localized="true">
+          <value xml:lang="en-US">JODReports</value>
+        </prop>
+        <node oor:name="ToolBarItems">
+          <node oor:name="B1" oor:op="replace">
+            <prop oor:name="Context" oor:type="xs:string">
+              <value>com.sun.star.text.TextDocument</value>
+            </prop>
+            <prop oor:name="Title" oor:type="xs:string">
+              <value xml:lang="en-US">Insert Script</value>
+            </prop>
+            <prop oor:name="URL" oor:type="xs:string">
+              <value>net.jodreport.ooAddon.jodaddon:JOOScript</value>
+            </prop>
+            <prop oor:name="Target" oor:type="xs:string">
+              <value>_self</value>
+            </prop>
+          </node>
+          <node oor:name="B2" oor:op="replace">
+            <prop oor:name="Context" oor:type="xs:string">
+              <value>com.sun.star.text.TextDocument</value>
+            </prop>
+            <prop oor:name="Title" oor:type="xs:string">
+              <value xml:lang="en-US">Generate Report</value>
+            </prop>
+            <prop oor:name="URL" oor:type="xs:string">
+              <value>net.jodreport.ooAddon.jodaddon:JODReport</value>
+            </prop>
+            <prop oor:name="Target" oor:type="xs:string">
+              <value>_self</value>
+            </prop>
+          </node>
+        </node>
       <node oor:name="m1" oor:op="replace">
         <prop oor:name="URL" oor:type="xs:string">
           <value>net.jodreport.ooAddon.jodaddon:JOOScript</value>
